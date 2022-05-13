@@ -2,15 +2,27 @@ package echo
 
 import (
 	"context"
+	"errors"
 
 	"github.com/mkawserm/abesh/constant"
 	"github.com/mkawserm/abesh/iface"
 	"github.com/mkawserm/abesh/model"
 	"github.com/mkawserm/abesh/registry"
+
+	iface2 "github.com/amjadjibon/encoding/iface"
+	registry2 "github.com/amjadjibon/encoding/registry"
 )
 
+type Response struct {
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+}
+
 type Echo struct {
-	mValues model.ConfigMap
+	mValues       model.ConfigMap
+	mEncodingName string
+	mEncoding     iface2.IEncoding
 }
 
 func (e *Echo) Name() string {
@@ -34,12 +46,16 @@ func (e *Echo) GetConfigMap() model.ConfigMap {
 }
 
 func (e *Echo) Setup() error {
+	e.mEncoding = registry2.EncodingRegistry().GetEncoding(e.mEncodingName)
+	if e.mEncoding == nil {
+		return errors.New("encoder not found")
+	}
 	return nil
 }
 
 func (e *Echo) SetConfigMap(values model.ConfigMap) error {
 	e.mValues = values
-
+	e.mEncodingName = values.String("encoding_name", "json")
 	return nil
 }
 
@@ -48,32 +64,27 @@ func (e *Echo) New() iface.ICapability {
 }
 
 func (e *Echo) Serve(_ context.Context, input *model.Event) (*model.Event, error) {
-	m := &model.Metadata{
-		Headers:        map[string]string{"Content-Type": "application/text"},
-		ContractIdList: []string{e.ContractId()},
-		StatusCode:     200,
-		Status:         "OK",
+	var response = &Response{
+		Code:    200,
+		Message: "OK",
+		Data: map[string]string{
+			"message": "Hello World",
+		},
 	}
 
-	outputEvent := &model.Event{
-		Metadata: m,
-		TypeUrl:  "application/text",
-		Value:    []byte("default echo"),
+	data, err := e.mEncoding.Marshal(response)
+	if err != nil {
+		return nil, err
 	}
 
-	if input.TypeUrl == "application/json" {
-		m.Headers["Content-Type"] = "application/json"
-		outputEvent.TypeUrl = "application/json"
-		outputEvent.Value = []byte("{\"message\":\"echo\"}")
-	}
-
-	if input.TypeUrl == "application/text" {
-		m.Headers["Content-Type"] = "application/text"
-		outputEvent.TypeUrl = "application/text"
-		outputEvent.Value = []byte("echo")
-	}
-
-	return outputEvent, nil
+	return model.GenerateOutputEvent(
+		input.Metadata,
+		e.ContractId(),
+		"OK",
+		200,
+		"application/json",
+		data,
+	), nil
 }
 
 func init() {

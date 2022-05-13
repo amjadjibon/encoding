@@ -6,6 +6,7 @@ import (
 	_ "github.com/mkawserm/abesh/capability/httpserver"
 	"github.com/mkawserm/abesh/cmd"
 
+	_ "github.com/amjadjibon/encoding"
 	_ "github.com/amjadjibon/encoding/example/echo"
 )
 

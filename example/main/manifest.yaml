@@ -4,7 +4,7 @@ capabilities:
   - contract_id: "abesh:httpserver"
     values:
       host: "0.0.0.0"
-      port: "9090"
+      port: "8080"
       default_request_timeout: "5s"
 
   - contract_id: "abesh:ex_echo"
