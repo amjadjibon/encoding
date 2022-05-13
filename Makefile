@@ -10,7 +10,21 @@ change-version:
 	@git push origin "v$(VERSION)"
 
 update-module:
-	get get github.com/mkawserm/abesh
+	go get github.com/mkawserm/abesh
+	go get google.golang.org/protobuf/proto
+	go get github.com/vmihailenco/msgpack/v5
+	go get github.com/pelletier/go-toml/v2
+	go get github.com/clbanning/mxj/v2
 
 run-example:
 	go run example/main/main.go embedded run
+
+test:
+	go test ./... -v -cover -coverprofile=coverage.out -covermode=atomic && go tool cover -html=coverage.out
+
+update-protoc:
+	@protoc \
+		-I=./proto \
+		--go_opt=module=github.com/amjadjibon/encoding \
+		--go_out=. \
+		./proto/test.proto

@@ -9,14 +9,13 @@ capabilities:
 
   - contract_id: "abesh:ex_echo"
     values:
-      key1: "test1"
-      key2: "test2"
+      encoding_name: "json"
 
 triggers:
   - trigger: "abesh:httpserver"
     trigger_values:
       method: "GET"
-      path: "/default"
+      path: "/json"
     service: "abesh:ex_echo"
 
 start:
