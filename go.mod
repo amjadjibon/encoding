@@ -3,7 +3,7 @@ module github.com/amjadjibon/encoding
 go 1.18
 
 require (
-	github.com/clbanning/mxj/v2 v2.5.5
+	github.com/clbanning/mxj/v2 v2.5.6
 	github.com/golang/protobuf v1.5.2
 	github.com/json-iterator/go v1.1.12
 	github.com/mkawserm/abesh v0.16.0
